@@ -129,13 +129,14 @@ This section lists other knowledge you may be interested in.
 1. Kill varnish by running "sudo pkill varnishd"  
 2. If you change 'default.vcl' when Varnish is running already, you can reload this new 'default.vcl' in 2 ways.
     ```
-    reload your VCL and wipe your cache in the process by running "sudo pkill varnishd " and "sudo /usr/local/sbin/varnishd -n /usr/local/var/varnish -f /usr/local/etc/varnish/default.vcl -s malloc,1G -T 127.0.0.1:2000 -a 127.0.0.1:8082" 
-    reload your VCL without wiping your cache by running
-    varnishadm -n /usr/local/var/varnish
-    vcl.load reload01 /usr/local/etc/varnish/default.vcl
-    vcl.use reload01
-    Note: 'reload01' is a random name and you could choose anything technically. Note, each time you reload the VCL file, you'll need to provide a unique name, so the second time you reload the VCL file you would use different string like reload02, reload03, etc.
+    1. reload your VCL and wipe your cache in the process by running "sudo pkill varnishd " and "sudo /usr/local/sbin/varnishd -n /usr/local/var/varnish -f /usr/local/etc/varnish/default.vcl -s malloc,1G -T 127.0.0.1:2000 -a 127.0.0.1:8082" 
+    2. reload your VCL without wiping your cache by running
+          varnishadm -n /usr/local/var/varnish
+          vcl.load reload01 /usr/local/etc/varnish/default.vcl
+          vcl.use reload01
     ```
+    Note: 'reload01' is a random name and you could choose anything technically. Note, each time you reload the VCL file, you'll need to provide a unique name, so the second time you reload the VCL file you would use different string like reload02, reload03, etc.
+       
 3. Check statistics of Varnish
     
     Varnish comes with a couple of nifty and very useful statistics generating tools that generates statistics in real time by constantly updating and presenting a specific dataset by aggregating and analyzing logdata from the shared memory logs. Please refer to https://www.varnish-cache.org/docs/4.0/users-guide/operation-statistics.html for moe details.
@@ -183,23 +184,22 @@ This section lists other knowledge you may be interested in.
 6. Concerned about flushing your backend server?
    Varnish has configuration of how many concurrent connections to backend server. You can set it at default.vcl , like this 
    ```
-   edit default.vcl
-       # Default backend. It should point to nginx server configured. 
-               backend default {
-               .host = "127.0.0.1"; //nginx ip
-               .port = "8080"; //niginx port
-               ....
-               .max_connections = 100 //100 simultaneous connections are allowed.
-               }
+   # Default backend. It should point to nginx server configured. 
+   backend default {
+       .host = "127.0.0.1"; //nginx ip
+       .port = "8080"; //niginx port
+       ....
+       .max_connections = 100 //100 simultaneous connections are allowed.
+   }
    ```
 7. Is stale object good to use?
    Varnish Cache will prefer a fresh object, but when one cannot be found Varnish will look for stale one. When it is found it will be delivered and Varnish will kick off the asynchronous request. It is serving the request with a stale object while refreshing it. It is basically stale-while-revalidate.
    ```
-    A graced object is an object that has expired, but is still kept in cache
-    Grace mode is when Varnish uses a graced object.
-    There is more than one way Varnish can end up using a graced object.
-    req.grace defines how long overdue an object can be for Varnish to still consider it for grace mode.
-    beresp.grace defines how long past the beresp.ttl-time Varnish will keep an object
-    req.grace is often modified in vcl_recv based on the state of the backend.
+    1. A graced object is an object that has expired, but is still kept in cache
+    2. Grace mode is when Varnish uses a graced object.
+    3. There is more than one way Varnish can end up using a graced object.
+    4. req.grace defines how long overdue an object can be for Varnish to still consider it for grace mode.
+    5. beresp.grace defines how long past the beresp.ttl-time Varnish will keep an object
+    6. req.grace is often modified in vcl_recv based on the state of the backend.
    ```
    When setting up grace, you will need to modify both vcl_recv and vcl_fetch to use grace effectively. The typical way to use grace is to store an object for several hours past its TTL, but only use it a few seconds after the TTL, except if the backend is sick. (Note: You can use set req.grace = 0s; to ensure that editorial staff doesn’t get older objects (assuming they also don’t hit the cache))
