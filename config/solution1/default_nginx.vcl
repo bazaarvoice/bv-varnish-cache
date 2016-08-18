@@ -54,8 +54,8 @@ sub vcl_hash {
 }
 
 sub vcl_backend_response {
-    # set ttl of resp to be 7 days  . object will be cached for this long.
-    set beresp.ttl = 7d;
+    # set ttl of resp to be 30 minutes  . object will be cached for this long.
+    set beresp.ttl = 30m;
     # set grace period to be 1 minute. Once object is being refreshed after ttl expires, within grace period, old object will be served.
     set beresp.grace = 1m;
 }
