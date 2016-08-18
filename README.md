@@ -22,7 +22,7 @@ Varnish is a good solution for caching, but there is one limitation: Varnish can
 1. Nginx is used as a proxy between Varnish and the Conversations API CDN. Varnish points backend server to Nginx and Nginx proxies requests to api.bazaarvoice.com or stg.api.bazaarvoice.com.
 2. A cron job executes a DSN resolving script, which updates IPs of api.bazaarvoice.com (stg.api.bazaarvoice.com) in backend_server.vcl, which is used by Varnish to set up backend servers, and reload new backend servers IPs without affecting cached objects.
 
-Varnish does not support SSL termination natively. If you decide move to https, please refer to [Use HTTPs with Varnish](#Use-HTTPs-with-Varnish).
+Varnish does not support SSL termination natively. If you decide move to https, please refer to [Use HTTPs with Varnish](#use-https-with-varnish).
 
 ![Varnish As caching](./pics/VarnishAsCaching.png?raw=true "Varnish As Caching")
 
@@ -40,6 +40,7 @@ For Mac OS, following are steps.
 1. Run 'brew update' //update brew itself
 2. Run 'brew install varnish'  //latest version 4.1 should be installed
 3. You should see a similar message after varnish is installed.
+
    ``` 
     To have launchd start varnish at login:
     ln -sfv /usr/local/opt/varnish/*.plist ~/Library/LaunchAgents
@@ -64,6 +65,7 @@ For Mac OS, following are steps.
    - You can add more than 1 DNS server. For example 'resolver 10.0.0.1 10.0.0.2 valid=300s;'.
    - How to get DNS server
      - Run 'nslookup api.bazaarvoice.com' and you will see a similar message
+     
        ```
        Server: 10.201.0.10
        Address: 10.201.0.10#53
@@ -105,7 +107,9 @@ For Mac OS, following are steps.
         .port = "8080"; //niginx port
     }
    ``` 
-3. Start Varnish by running ``` /usr/local/sbin/varnishd -n /usr/local/var/varnish -f /usr/local/etc/varnish/default_nginx.vcl -s malloc,5G -T 127.0.0.1:2000 -a 127.0.0.1:8082 ```
+3. Start Varnish by running 
+   
+   ``` /usr/local/sbin/varnishd -n /usr/local/var/varnish -f /usr/local/etc/varnish/default_nginx.vcl -s malloc,5G -T 127.0.0.1:2000 -a 127.0.0.1:8082 ```
     - For more options to start Varnish , please refer to https://www.varnish-cache.org/docs/4.0/reference/varnishd.html
     - parameters
       - /usr/local/sbin/varnishd : This is path to varnishd after installation.
@@ -114,7 +118,7 @@ For Mac OS, following are steps.
       - -a : 127.0.0.1:8082 the port where varnish will run
       - -T : 127.0.0.1:2000 is where the varnishadm console wil run and it is useful to have for things like purging and banning. (optional) 
       - -s malloc,5G : 5G memory will be used to store cache. 
-        - You can use different storage for cache. For more details , please refer to https://www.varnish-cache.org/docs/trunk/users-guide/storage-backends.html. [How Varnish Recycles Space](#How-Varnish-recycles-space)
+        - You can use different storage for cache. For more details , please refer to https://www.varnish-cache.org/docs/trunk/users-guide/storage-backends.html. [How Varnish Recycles Space](#how-varnish-recycles-space)
      
 4.  Varsnish should be accessible at http://localhost:8082 . (You have to specify backend server at /usr/local/etc/varnish/default.vcl , otherwise, you will see "Error 503 Backend fetch failed").
     - Make your client application call tohttp://localhost:8082/api (or http://localhost:8082/stg_api) instead of calling to http://api.bazaarvoice.com/ (or  http://stg.api.bazaarvoice.com/ ).
@@ -148,7 +152,9 @@ For Mac OS, following are steps.
     - Important: This is example in Mac Os. Change to your own absolute path here. You can see logs in /tmp/stdout.log and /tmp/stderr.log to track periodic update.
       - 1st parameter is the same as '-n' when you run Varnish and 2nd is path to 'default.vcl'
       - If you are running Linux, you may want to change line 92 '... awk '{print $4;}' ...' to '... awk '{print $3;}' ...'
-5. Start Varnish by running ```/usr/local/sbin/varnishd -n /usr/local/var/varnish -f /usr/local/etc/varnish/default_nginx.vcl -s malloc,5G -T 127.0.0.1:2000 -a 127.0.0.1:8082```
+5. Start Varnish by running 
+
+```/usr/local/sbin/varnishd -n /usr/local/var/varnish -f /usr/local/etc/varnish/default_nginx.vcl -s malloc,5G -T 127.0.0.1:2000 -a 127.0.0.1:8082```
 
 6. Varsnish should be accessible at http://localhost:8082 . (You have to specify backend server at /usr/local/etc/varnish/default.vcl , otherwise, you will see "Error 503 Backend fetch failed").
    - Make your client application call tohttp://localhost:8082/api (or http://localhost:8082/stg_api) instead of calling to http://api.bazaarvoice.com/ (or  http://stg.api.bazaarvoice.com/ ).
@@ -158,6 +164,7 @@ This section lists additional information you may be interested in.
 
 ### Reload new vcl
 If you change 'default.vcl' when Varnish is running already, you can reload this new 'default.vcl' in 2 ways.
+
 1. reload your VCL and wipe your cache in the process by running ```sudo pkill varnishd``` and ```sudo /usr/local/sbin/varnishd -n /usr/local/var/varnish -f /usr/local/etc/varnish/default.vcl -s malloc,1G -T 127.0.0.1:2000 -a 127.0.0.1:8082``` 
 2. reload your VCL without wiping your cache by running following commands.
    ``` 
@@ -194,7 +201,7 @@ Please refer to https://www.varnish-cache.org/docs/4.0/users-guide/operation-sta
 ### Hit or Miss
 To see if reponse is returned because of 'hit' or 'miss' (by retrieving backend server), you can check 'X-Cache' in reponse header. 'HIT' means 'hit' and 'MISS' means response is retrieved from backend server because response is not cached or expires.
 
-    ![x-cache](./pics/x-cache.png?raw=true "x-cache")
+![x-cache](./pics/x-cache.png?raw=true "x-cache")
 
 ### Use HTTPs with Varnish
 Varnish does not support SSL termination. If you decide move to https, does it mean that your sites, which use Varnish as a proxy cache, would remain without HTTPS forever ? No, you have several options to support this. Basically, you want to put a proxy between client and Varnish, which will route https requests to Varnish via http.  
