@@ -118,7 +118,8 @@ For Mac OS, following are steps.
       - -a : 127.0.0.1:8082 the port where varnish will run
       - -T : 127.0.0.1:2000 is where the varnishadm console wil run and it is useful to have for things like purging and banning. (optional) 
       - -s malloc,5G : 5G memory will be used to store cache. 
-        - You can use different storage for cache. For more details , please refer to https://www.varnish-cache.org/docs/trunk/users-guide/storage-backends.html. [How Varnish Recycles Space](#how-varnish-recycles-space)
+        - You can use different storage for cache. For more details , please refer to https://www.varnish-cache.org/docs/trunk/users-guide/storage-backends.html.
+        - [How Varnish Recycles Space](#how-varnish-recycles-space)
      
 4.  Varsnish should be accessible at http://localhost:8082 . (You have to specify backend server at /usr/local/etc/varnish/default.vcl , otherwise, you will see "Error 503 Backend fetch failed").
     - Make your client application call tohttp://localhost:8082/api (or http://localhost:8082/stg_api) instead of calling to http://api.bazaarvoice.com/ (or  http://stg.api.bazaarvoice.com/ ).
