@@ -152,11 +152,9 @@ For Mac OS, following are steps.
     - Important: This is example in Mac Os. Change to your own absolute path here. You can see logs in /tmp/stdout.log and /tmp/stderr.log to track periodic update.
       - 1st parameter is the same as '-n' when you run Varnish and 2nd is path to 'default.vcl'
       - If you are running Linux, you may want to change line 92 '... awk '{print $4;}' ...' to '... awk '{print $3;}' ...'
-5. Start Varnish by running 
+5. Start Varnish by running ```/usr/local/sbin/varnishd -n /usr/local/var/varnish -f /usr/local/etc/varnish/default_nginx.vcl -s malloc,5G -T 127.0.0.1:2000 -a 127.0.0.1:8082```
 
-```/usr/local/sbin/varnishd -n /usr/local/var/varnish -f /usr/local/etc/varnish/default_nginx.vcl -s malloc,5G -T 127.0.0.1:2000 -a 127.0.0.1:8082```
-
-6. Varsnish should be accessible at http://localhost:8082 . (You have to specify backend server at /usr/local/etc/varnish/default.vcl , otherwise, you will see "Error 503 Backend fetch failed").
+6. Varnish should be accessible at http://localhost:8082 . (You have to specify backend server at /usr/local/etc/varnish/default.vcl , otherwise, you will see "Error 503 Backend fetch failed").
    - Make your client application call tohttp://localhost:8082/api (or http://localhost:8082/stg_api) instead of calling to http://api.bazaarvoice.com/ (or  http://stg.api.bazaarvoice.com/ ).
 
 ## Additional information
@@ -167,11 +165,13 @@ If you change 'default.vcl' when Varnish is running already, you can reload this
 
 1. reload your VCL and wipe your cache in the process by running ```sudo pkill varnishd``` and ```sudo /usr/local/sbin/varnishd -n /usr/local/var/varnish -f /usr/local/etc/varnish/default.vcl -s malloc,1G -T 127.0.0.1:2000 -a 127.0.0.1:8082``` 
 2. reload your VCL without wiping your cache by running following commands.
+
    ``` 
    varnishadm -n /usr/local/var/varnish
    vcl.load reload01 /usr/local/etc/varnish/default.vcl
    vcl.use reload01
    ```
+   
    - Important: 'reload01' is a random name and you could choose anything technically. Note, each time you reload the VCL file, you'll need to provide a unique name, so the second time you reload the VCL file you would use different string like reload02, reload03, etc.
        
 ### Statistics of Varnish
@@ -180,7 +180,8 @@ Varnish comes with a couple of nifty and very useful tools that generate statist
 Please refer to https://www.varnish-cache.org/docs/4.0/users-guide/operation-statistics.html for moe details.
 
 1. To see a continuously updated histogram of hits/misses of cached objects, run ```varnishhist -n /usr/local/var/varnish```.
-   - Important: If you run varnish with '-n', all statistics commands should have this option too; otherwise, you will see         
+   - Important: If you run varnish with '-n', all statistics commands should have this option too; otherwise, you will see  
+          
      ```
         Can't open log - retrying for 5 seconds
         Can't open VSM file (Cannot open /usr/local/var/varnish/mycomputer.local/_.vsm: No such file or directory
@@ -220,6 +221,7 @@ Varnish does not support SSL termination. If you decide move to https, does it m
 
 ### Concurrent connections
 Varnish supports concurrent connections to backend servers by configuration.  This parameter can be set in default.vcl, like this 
+
    ```
    # Default backend. It should point to nginx server configured. 
    backend default {
