@@ -37,8 +37,8 @@ Varnish can be installed on different operating system. Please refer to this pag
 
 For Mac OS, following are steps.
 
-1. Run 'brew update' //update brew itself
-2. Run 'brew install varnish'  //latest version 4.1 should be installed
+1. Run 'brew update'
+2. Run 'brew install varnish'  //make sure version 4.0 or later is installed
 3. You should see a similar message after varnish is installed.
 
    ``` 
@@ -57,8 +57,8 @@ Nginx can be installed on different operating systems. Please refer to http://ng
 
 For Mac OS, following are steps.
 
-1. Run 'brew update' //update brew itself
-2. Run 'brew install nginx'  //nginx 1.10 or later release should be installed
+1. Run 'brew update'
+2. Run 'brew install nginx'  //make sure version 1.10 or later is installed
 3. Copy 'nginx.conf' under ./config/solution1/ to corresponding location. (In Mac OS, it is /usr/local/etc/nginx/)  
 4. Use editor to open 'nginx.conf' and change 'resolver x.x.x.x valid=300s;' to correponding DNS server you use.
    - 'valid=300s' means Nginx refresh DSN records every 5 minutes; Removing it makes Nginx use TTL from DNS server.
